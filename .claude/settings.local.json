@@ -24,7 +24,18 @@
       "WebFetch(domain:render.com)",
       "WebFetch(domain:docs.railway.com)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git config *)",
+      "Bash(git commit -q -m 'PROWEB HR — vacancy intelligence CRM *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git ls-tree *)",
+      "Bash(git pull *)",
+      "WebFetch(domain:fly.io)",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "Bash(curl -s \"http://127.0.0.1:8000/static/css/app.css\")",
+      "Bash(git commit -q -m 'Railway deploy konfiguratsiyasi + scrollbar fix *)"
     ]
   }
 }

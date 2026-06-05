@@ -16,9 +16,9 @@ if [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then
   python manage.py createsuperuser --noinput || true
 fi
 
-# Gunicorn — port 8000 (whitenoise static fayllarni xizmat qiladi)
+# Gunicorn — $PORT (Railway/Fly dinamik port beradi, default 8000)
 exec gunicorn jobhunter_crm.wsgi:application \
-  --bind 0.0.0.0:8000 \
+  --bind "0.0.0.0:${PORT:-8000}" \
   --workers 2 \
   --timeout 120 \
   --access-logfile - \
