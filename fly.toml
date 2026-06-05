@@ -1,0 +1,37 @@
+# Fly.io configuration for PROWEB HR
+app            = "proweb-hr"
+primary_region = "fra"   # Frankfurt — Uzbekistonga yaqin, arzon
+
+[build]
+  dockerfile = "Dockerfile.fly"
+
+[env]
+  DJANGO_SETTINGS_MODULE = "jobhunter_crm.settings"
+  DJANGO_DEBUG           = "False"
+  DJANGO_ALLOWED_HOSTS   = "proweb-hr.fly.dev"
+  DATABASE_PATH          = "/data/db.sqlite3"
+  TZ                     = "Asia/Tashkent"
+  PORT                   = "8000"
+
+[http_service]
+  internal_port        = 8000
+  force_https          = true
+  auto_stop_machines   = false   # MUHIM: o'chmasin (parser to'xtamasligi uchun)
+  auto_start_machines  = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type       = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+[[vm]]
+  memory   = "512mb"
+  cpu_kind = "shared"
+  cpus     = 1
+
+# Persistent disk — SQLite shu yerda saqlanadi (1GB bepul)
+[[mounts]]
+  source       = "proweb_data"
+  destination  = "/data"
+  initial_size = "1gb"

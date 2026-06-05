@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.logs_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.logs_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">{{ t.logs_title }}</h1><p class="page-subtitle">{{ t.logs_subtitle }}</p></div>
+</div>
+
+<form method="get" class="card filters">
+  <div class="field">
+    <label>{{ t.logs_filter_level }}</label>
+    <select name="level" class="input">
+      <option value="">{{ t.logs_level_all }}</option>
+      <option value="info"    {% if selected_level == 'info'    %}selected{% endif %}>Info</option>
+      <option value="success" {% if selected_level == 'success' %}selected{% endif %}>Success</option>
+      <option value="warning" {% if selected_level == 'warning' %}selected{% endif %}>Warning</option>
+      <option value="error"   {% if selected_level == 'error'   %}selected{% endif %}>Error</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>{{ t.logs_filter_source }}</label>
+    <select name="source" class="input">
+      <option value="">{{ t.logs_level_all }}</option>
+      <option value="parser">Parser</option>
+      <option value="ai">AI</option>
+      <option value="system">System</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit"><span class="nav-icon" style="font-size:16px;">filter_list</span>{{ t.btn_filter }}</button>
+  <a class="btn btn-danger" href="{% url 'logs_app:clear' %}" onclick="return confirm('{{ t.logs_confirm_clear }}')">
+    <span class="nav-icon" style="font-size:16px;">delete_sweep</span>{{ t.logs_btn_clear }}
+  </a>
+</form>
+
+<section class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>{{ t.logs_col_time }}</th><th>{{ t.logs_col_level }}</th><th>{{ t.logs_col_source }}</th><th>{{ t.logs_col_msg }}</th><th>{{ t.logs_col_user }}</th></tr></thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td style="white-space:nowrap;">{{ log.created_at|date:"d.m.Y H:i" }}</td>
+        <td><span class="badge {% if log.level == 'error' %}badge-red{% elif log.level == 'success' %}badge-green{% elif log.level == 'warning' %}badge-yellow{% else %}badge-gray{% endif %}">{{ log.get_level_display }}</span></td>
+        <td>{{ log.get_source_display }}</td>
+        <td>{{ log.message }}</td>
+        <td>{{ log.user|default:"-" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="5" class="empty">{{ t.empty_logs }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

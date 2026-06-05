@@ -1,0 +1,34 @@
+# PROWEB HR — Fly.io Dockerfile (gunicorn + whitenoise, no nginx)
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TZ=Asia/Tashkent \
+    DJANGO_SETTINGS_MODULE=jobhunter_crm.settings
+
+# System deps (lxml uchun)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc libxml2-dev libxslt-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Project
+COPY . .
+
+WORKDIR /app/jobhunter_crm
+
+# Static fayllarni yig'ish (whitenoise xizmat qiladi)
+RUN mkdir -p staticfiles && python manage.py collectstatic --noinput --clear
+
+# Entrypoint skripti
+COPY entrypoint.fly.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8000
+
+CMD ["/entrypoint.sh"]

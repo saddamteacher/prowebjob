@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.parser_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.parser_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">{{ t.parser_title }}</h1><p class="page-subtitle">{{ t.parser_subtitle }}</p></div>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="{% url 'parser:run' %}">
+      <span class="nav-icon" style="font-size:16px;">play_arrow</span>{{ t.btn_run_parser }}
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-3">
+  {% for plat in platforms %}
+  <section class="card card-pad">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="status-dot {% if plat.is_working %}ok{% else %}bad{% endif %}"></span>
+        <h2 class="card-title">{{ plat.name }}</h2>
+      </div>
+      <span class="badge {% if plat.is_enabled %}badge-green{% else %}badge-gray{% endif %}">
+        {% if plat.is_enabled %}{{ t.status_active }}{% else %}{{ t.status_disabled }}{% endif %}
+      </span>
+    </div>
+    <div class="metric-row"><span class="metric-label">{{ t.parser_last_check }}</span><span style="font-size:12px;">{{ plat.last_check|date:"d.m.Y H:i"|default:t.time_not_checked }}</span></div>
+    <div class="metric-row"><span class="metric-label">{{ t.parser_last_result }}</span><strong class="text-accent">{{ plat.last_fetch_count }}</strong></div>
+    <div class="metric-row"><span class="metric-label">{{ t.parser_total }}</span><strong>{{ plat.total_vacancies }}</strong></div>
+    <div class="metric-row"><span class="metric-label">{{ t.parser_errors }}</span><strong class="{% if plat.consecutive_errors > 0 %}text-danger{% endif %}">{{ plat.consecutive_errors }}</strong></div>
+    {% if plat.last_error_message %}<div class="alert alert-error section-gap" style="font-size:11px;">{{ plat.last_error_message|truncatechars:100 }}</div>{% endif %}
+  </section>
+  {% empty %}<div class="card empty" style="grid-column:span 3;">{{ t.empty_platforms }}</div>{% endfor %}
+</div>
+
+<section class="card section-gap">
+  <div class="card-pad" style="border-bottom:1px solid rgba(255,255,255,.05);"><h2 class="card-title">{{ t.parser_log_title }}</h2></div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{ t.parser_log_time }}</th><th>{{ t.parser_log_vac }}</th><th>{{ t.parser_log_action }}</th><th>{{ t.parser_log_detail }}</th></tr></thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr>
+          <td>{{ log.created_at|date:"d.m.Y H:i" }}</td>
+          <td>{{ log.vacancy.title|truncatechars:50 }}</td>
+          <td><span class="badge {% if log.action == 'new' %}badge-green{% elif log.action == 'duplicate' %}badge-yellow{% else %}badge-gray{% endif %}">{{ log.get_action_display }}</span></td>
+          <td>{{ log.details|default:"-" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="4" class="empty">{{ t.empty_logs }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

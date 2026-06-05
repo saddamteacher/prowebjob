@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.comp_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.comp_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">{{ t.comp_title }}</h1><p class="page-subtitle">{{ companies|length }} {{ t.comp_subtitle }}</p></div>
+</div>
+<div class="grid grid-3">
+  {% for comp in companies %}
+  <a class="card card-pad" href="{% url 'companies:detail' comp.id %}">
+    <div class="card-head">
+      <span class="logo-chip" style="width:42px;height:42px;font-size:12px;">{{ comp.name|slice:":2"|upper }}</span>
+      {% if comp.is_top %}<span class="badge badge-green"><span class="nav-icon" style="font-size:12px;">star</span>TOP</span>{% endif %}
+    </div>
+    <h2 class="card-title truncate" style="margin-bottom:4px;">{{ comp.name }}</h2>
+    <p class="card-subtitle">{{ comp.company_type|default:t.comp_type_unknown }}</p>
+    <div class="metric-row section-gap">
+      <span class="metric-label">{{ t.comp_vacancies }}</span>
+      <strong class="text-accent">{{ comp.vacancy_count }}</strong>
+    </div>
+  </a>
+  {% empty %}<div class="card empty" style="grid-column:span 3;">{{ t.empty_companies }}</div>
+  {% endfor %}
+</div>
+{% endblock %}

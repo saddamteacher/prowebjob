@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.sch_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.sch_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">{{ t.sch_title }}</h1><p class="page-subtitle">{{ t.sch_subtitle }}</p></div>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="{% url 'scheduler:run_parser' %}">
+      <span class="nav-icon" style="font-size:16px;">play_arrow</span>{{ t.btn_run_now }}
+    </a>
+  </div>
+</div>
+<div class="grid grid-2">
+  <section class="card card-pad">
+    <div class="card-head"><div><h2 class="card-title">{{ t.sch_sec_jobs }}</h2><p class="card-subtitle">{{ t.sch_sec_jobs_s }}</p></div></div>
+    <div class="list">
+      {% for job in jobs %}
+      <div class="list-row">
+        <span class="status-dot {% if job.next_run_time %}ok{% endif %}"></span>
+        <div class="list-row-main">
+          <div class="list-row-title">{{ job.name }}</div>
+          <div class="list-row-meta">{{ job.job_id }}{% if job.next_run_time %} · {{ job.next_run_time|date:"d.m.Y H:i" }}{% endif %}</div>
+        </div>
+        {% if job.next_run_time %}<span class="badge badge-green">{{ t.sch_badge_active }}</span>
+        {% else %}<span class="badge badge-gray">{{ t.sch_badge_wait }}</span>{% endif %}
+      </div>
+      {% empty %}<div class="empty"><span class="nav-icon" style="font-size:36px;display:block;margin-bottom:10px;color:var(--muted-2);">schedule</span>{{ t.empty_tasks }}</div>{% endfor %}
+    </div>
+  </section>
+  <section class="card card-pad">
+    <div class="card-head"><div><h2 class="card-title">{{ t.sch_sec_exec }}</h2><p class="card-subtitle">{{ t.sch_sec_exec_s }}</p></div></div>
+    <div class="list">
+      {% for exec in recent_executions %}
+      <div class="list-row">
+        <span class="status-dot {% if exec.status == 'S' %}ok{% else %}bad{% endif %}"></span>
+        <div class="list-row-main">
+          <div class="list-row-title">{{ exec.job.name|default:exec.job_id }}</div>
+          <div class="list-row-meta">{{ exec.run_time|timesince }} {{ t.time_ago }}</div>
+        </div>
+        <span class="badge {% if exec.status == 'S' %}badge-green{% else %}badge-red{% endif %}">
+          {% if exec.status == 'S' %}{{ t.sch_exec_ok }}{% else %}{{ t.sch_exec_err }}{% endif %}
+        </span>
+      </div>
+      {% empty %}<div class="empty">{{ t.empty_executions }}</div>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

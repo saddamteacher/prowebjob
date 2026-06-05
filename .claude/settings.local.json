@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(head -80)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "PowerShell(cd D:\\\\vakansiyabot\\\\jobhunter_ai; $env:PYTHONIOENCODING=\"utf-8\"; .\\\\venv\\\\Scripts\\\\python.exe test_system.py 2>&1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/dashboard/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/analytics/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/vacancies/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/platforms/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/companies/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/parsers/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/logs/)",
+      "Bash(Get-ChildItem -Path \"D:\\\\vakansiyabot\\\\jobhunter_ai\\\\jobhunter_crm\" -Recurse -Include \"*.log\", \"*.tmp\", \"*.pid\", \"*.sqlite3\")",
+      "Bash(Select-Object FullName)",
+      "PowerShell(cd D:\\\\vakansiyabot\\\\jobhunter_ai; Get-Content server_err.txt | Where-Object { $_ -match \"ERROR|500|Exception|Traceback\" } | Select-Object -First 20)",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt http://127.0.0.1:8000/dashboard/)",
+      "Bash(curl -s http://127.0.0.1:8000/ -L)",
+      "WebFetch(domain:railway.com)",
+      "WebFetch(domain:render.com)",
+      "WebFetch(domain:docs.railway.com)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}

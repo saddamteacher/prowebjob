@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}{{ cat.name }} limiti - PROWEB HR{% endblock %}
+{% block breadcrumb %}Yo'nalish limiti{% endblock %}
+{% block content %}
+<div class="page-head"><div><a class="page-subtitle" href="{% url 'vacancies:categories' %}">Yo'nalishlarga qaytish</a><h1 class="page-title" style="margin-top:8px;">{{ cat.name }}</h1><p class="page-subtitle">Kunlik vakansiya limitini o'zgartirish.</p></div></div>
+<section class="card card-pad" style="max-width:520px;"><form method="post">{% csrf_token %}<div class="field"><label>Kunlik limit</label><input class="input" type="number" name="daily_limit" value="{{ cat.daily_limit }}" min="0"></div><div class="page-actions section-gap"><button class="btn btn-primary" type="submit">Saqlash</button><a class="btn btn-secondary" href="{% url 'vacancies:categories' %}">Bekor qilish</a></div></form></section>
+{% endblock %}

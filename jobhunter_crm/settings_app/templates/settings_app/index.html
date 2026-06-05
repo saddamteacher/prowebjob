@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.set_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.set_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">{{ t.set_title }}</h1><p class="page-subtitle">{{ t.set_subtitle }}</p></div>
+  <div class="page-actions">
+    <a class="btn btn-secondary" target="_blank" href="{% url 'admin:index' %}">
+      <span class="nav-icon" style="font-size:16px;">admin_panel_settings</span>{{ t.btn_django_admin }}
+    </a>
+  </div>
+</div>
+<div class="grid grid-2">
+  <section class="card card-pad">
+    <div class="card-head"><div><h2 class="card-title">{{ t.set_daily_title }}</h2><p class="card-subtitle">{{ t.set_daily_sub }}</p></div></div>
+    <form method="post" action="{% url 'settings_app:update' %}">
+      {% csrf_token %}
+      <input type="hidden" name="key" value="daily_total_limit">
+      <div class="field" style="margin-bottom:12px;"><label>{{ t.set_daily_lbl }}</label><input class="input" type="number" name="value" value="{{ daily_limit }}" min="0"></div>
+      <button class="btn btn-primary" type="submit" style="width:100%;"><span class="nav-icon" style="font-size:16px;">save</span>{{ t.btn_save }}</button>
+    </form>
+  </section>
+  <section class="card card-pad">
+    <div class="card-head"><div><h2 class="card-title">{{ t.set_all_title }}</h2><p class="card-subtitle">{{ t.set_all_sub }}</p></div></div>
+    <div class="list">
+      {% for s in settings %}
+      <form method="post" action="{% url 'settings_app:update' %}" class="list-row">
+        {% csrf_token %}
+        <input type="hidden" name="key" value="{{ s.key }}">
+        <div class="list-row-main"><div class="list-row-title">{{ s.key }}</div></div>
+        <input class="input" style="max-width:160px;" name="value" value="{{ s.value }}">
+        <button class="btn btn-primary" type="submit" style="min-height:32px;padding:5px 12px;"><span class="nav-icon" style="font-size:14px;">check</span></button>
+      </form>
+      {% empty %}<div class="empty">{{ t.empty_data }}</div>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

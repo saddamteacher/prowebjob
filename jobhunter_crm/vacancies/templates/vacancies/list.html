@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.vac_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.vac_title }}{% endblock %}
+{% block content %}
+<style>
+.filter-wrap{background:rgba(10,11,15,.8);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px;backdrop-filter:blur(12px)}
+.filter-field{display:flex;flex-direction:column;gap:5px}
+.filter-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-2)}
+.filter-field input,.filter-field select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:8px;padding:8px 12px;font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s;min-height:36px}
+.filter-field input::placeholder{color:var(--muted-2)}
+.filter-field input:focus,.filter-field select:focus{border-color:rgba(201,243,28,.5);box-shadow:0 0 0 3px rgba(201,243,28,.07)}
+.filter-field select{color-scheme:dark;cursor:pointer}
+.filter-field select option{background:#111317;color:#fff}
+.filter-wide{flex:2 1 220px}.filter-norm{flex:1 1 150px}
+.vac-list{background:rgba(10,11,15,.8);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;backdrop-filter:blur(12px)}
+.vac-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+.vac-row:hover{background:rgba(201,243,28,.03)}
+.vac-row:last-child{border-bottom:0}
+</style>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">{{ t.vac_title }}</h1>
+    <p class="page-subtitle">{{ vacancies|length }} ta</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-secondary" href="{% url 'vacancies:categories' %}">
+      <span class="nav-icon" style="font-size:15px">category</span>{{ t.vac_btn_categories }}
+    </a>
+  </div>
+</div>
+
+<form method="get" class="filter-wrap">
+  <div class="filter-field filter-wide">
+    <label>{{ t.vac_filter_search }}</label>
+    <input name="q" value="{{ q }}" placeholder="{{ t.vac_filter_ph }}">
+  </div>
+  <div class="filter-field filter-norm">
+    <label>{{ t.vac_filter_dir }}</label>
+    <select name="category">
+      <option value="">{{ t.btn_all|slice:":-2" }}</option>
+      {% for cat in categories %}
+      <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-field filter-norm">
+    <label>{{ t.vac_filter_plat }}</label>
+    <select name="source">
+      <option value="">{{ t.btn_all|slice:":-2" }}</option>
+      {% for src in sources %}
+      <option value="{{ src }}" {% if selected_source == src %}selected{% endif %}>{{ src }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-field filter-norm">
+    <label>{{ t.vac_filter_sort }}</label>
+    <select name="sort">
+      <option value="-created_at">{{ t.vac_sort_newest }}</option>
+      <option value="-score" {% if sort == '-score' %}selected{% endif %}>{{ t.vac_sort_score }}</option>
+      <option value="title" {% if sort == 'title' %}selected{% endif %}>{{ t.vac_sort_name }}</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit" style="min-height:36px;">
+    <span class="nav-icon" style="font-size:15px">filter_list</span>{{ t.btn_filter }}
+  </button>
+  {% if q or selected_category or selected_source %}
+  <a class="btn btn-ghost" href="{% url 'vacancies:list' %}" style="min-height:36px;">
+    <span class="nav-icon" style="font-size:15px">close</span>{{ t.btn_clear }}
+  </a>
+  {% endif %}
+</form>
+
+<div class="vac-list">
+  {% for v in vacancies %}
+  <div class="vac-row">
+    <span class="logo-chip" style="font-size:9px;width:34px;height:34px;">{{ v.source|slice:":2"|upper }}</span>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        {{ v.title }}
+        {% if v.is_remote %}<span class="badge badge-green" style="margin-left:6px;font-size:9px;">{{ t.vac_badge_remote }}</span>{% endif %}
+      </div>
+      <div style="color:var(--muted-2);font-size:11px;margin-top:3px;">
+        {{ v.company_name }} · {{ v.city|default:t.vac_no_city }} · {{ v.source }}{% if v.salary %} · {{ v.salary }}{% endif %}
+      </div>
+    </div>
+    <span class="badge badge-gray" style="font-size:9px;white-space:nowrap;">{{ v.category.name|default:t.vac_no_category }}</span>
+    <strong style="font-size:13px;min-width:28px;text-align:right;{% if v.score >= 90 %}color:var(--accent){% elif v.score >= 70 %}color:#67b7ff{% else %}color:var(--muted){% endif %}">{{ v.score }}</strong>
+    <a class="btn btn-secondary" href="{% url 'vacancies:detail' v.id %}" style="min-height:30px;padding:5px 12px;font-size:11px;">{{ t.btn_open }}</a>
+  </div>
+  {% empty %}
+  <div class="empty" style="padding:48px;">
+    <span class="nav-icon" style="font-size:44px;display:block;margin-bottom:12px;color:var(--muted-2)">search_off</span>
+    {{ t.empty_vacancies }}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

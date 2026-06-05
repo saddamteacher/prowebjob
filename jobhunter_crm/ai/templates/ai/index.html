@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.ai_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.ai_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">{{ t.ai_title }}</h1><p class="page-subtitle">{{ t.ai_subtitle }}</p></div>
+  <div class="page-actions">
+    {% if companies %}
+    <form method="post" action="{% url 'ai:check_all' %}">{% csrf_token %}
+      <button class="btn btn-primary" type="submit">
+        <span class="nav-icon" style="font-size:16px;">auto_awesome</span>{{ t.ai_batch_n }} ({{ companies|length }})
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:16px;">
+  <div class="card stat"><span class="stat-label">Groq</span><strong class="stat-value {% if groq_key %}accent{% else %}text-danger{% endif %}" style="font-size:18px;">{% if groq_key %}{{ t.ai_connected }}{% else %}{{ t.ai_not_connected }}{% endif %}</strong></div>
+  <div class="card stat"><span class="stat-label">{{ t.ai_model_lbl }}</span><strong style="font-size:12px;font-weight:700;color:var(--accent);">{{ groq_model }}</strong></div>
+  <div class="card stat"><span class="stat-label">{{ t.ai_fake_companies }}</span><strong class="stat-value text-danger">{{ fake_count }}</strong></div>
+  <div class="card stat"><span class="stat-label">{{ t.ai_top_companies }}</span><strong class="stat-value accent">{{ top_count }}</strong></div>
+</div>
+
+<div class="grid grid-2">
+  <section class="card card-pad">
+    <div class="card-head"><div><h2 class="card-title">{{ t.ai_unchecked_title }}</h2><p class="card-subtitle">{{ companies|length }} {{ t.ai_unchecked_sub }}</p></div></div>
+    <div class="list">
+      {% for comp in companies %}
+      <form method="post" action="{% url 'ai:check_company' %}" class="list-row">{% csrf_token %}
+        <input type="hidden" name="company_id" value="{{ comp.id }}">
+        <span class="logo-chip">{{ comp.name|slice:":2"|upper }}</span>
+        <div class="list-row-main">
+          <div class="list-row-title">{{ comp.name }}</div>
+          <div class="list-row-meta">{{ t.ai_added }}: {{ comp.created_at|date:"d.m.Y" }}</div>
+        </div>
+        <button class="btn btn-secondary" type="submit" style="min-height:30px;padding:5px 10px;white-space:nowrap;">
+          <span class="nav-icon" style="font-size:14px;">auto_awesome</span>{{ t.ai_btn_single }}
+        </button>
+      </form>
+      {% empty %}<div class="empty"><span class="nav-icon" style="font-size:36px;display:block;margin-bottom:10px;color:var(--accent);">check_circle</span>{{ t.empty_all_checked }}</div>{% endfor %}
+    </div>
+  </section>
+
+  <section class="card card-pad">
+    <div class="card-head"><div><h2 class="card-title">{{ t.ai_results_title }}</h2><p class="card-subtitle">{{ t.ai_results_sub }}</p></div></div>
+    <div class="list">
+      {% for comp in checked %}
+      <div class="list-row" style="flex-direction:column;align-items:stretch;gap:8px;padding:14px 12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="logo-chip {% if not comp.is_real %}text-danger{% endif %}" style="{% if not comp.is_real %}background:rgba(255,180,171,.08);border-color:rgba(255,180,171,.2);{% endif %}">{{ comp.name|slice:":2"|upper }}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <strong class="truncate" style="font-size:13px;">{{ comp.name }}</strong>
+              {% if comp.is_top %}<span class="badge badge-green"><span class="nav-icon" style="font-size:11px;margin-right:2px;">star</span>{{ t.ai_badge_top }}</span>{% endif %}
+              {% if not comp.is_real %}<span class="badge badge-red">{{ t.ai_badge_fake }}</span>{% endif %}
+            </div>
+            <div style="margin-top:4px;"><span class="badge badge-gray">{{ comp.company_type|default:t.empty_data }}</span></div>
+          </div>
+        </div>
+        {% if comp.description %}<p style="color:var(--muted);font-size:12px;line-height:1.6;margin:0;padding:0 4px;">{{ comp.description }}</p>{% endif %}
+      </div>
+      {% empty %}<div class="empty">{{ t.empty_checked }}</div>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

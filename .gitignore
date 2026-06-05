@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Django
+*.db
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/
+
+# Environment
+.env
+.env.*
+!.env.example
+jobhunter_crm/.env
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Docker
+.containers/
+
+# Runtime artifacts
+server_out.txt
+server_err.txt
+*.log
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage

@@ -1,0 +1,168 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PROWEB HR — Premium Transitions (inspired by transitions.dev)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Notification Badge — Diagonal slide with spring pop-in ── */
+@keyframes notif-slide-in {
+  0% { transform: translate(-8.2px, 12.4px); opacity: 0; }
+  100% { transform: translate(0, 0); opacity: 1; }
+}
+@keyframes notif-scale-in {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.36); }
+  100% { transform: scale(1); }
+}
+.pw-notif-enter {
+  animation: notif-slide-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both,
+             notif-scale-in 500ms cubic-bezier(0.34, 1.36, 0.64, 1) both;
+}
+
+/* ── 2. Menu Dropdown — Origin-aware open / close ── */
+@keyframes dropdown-open {
+  0% { opacity: 0; transform: scale(0.97) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes dropdown-close {
+  0% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.99) translateY(-2px); }
+}
+.pw-dropdown-enter {
+  animation: dropdown-open 250ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.pw-dropdown-leave {
+  animation: dropdown-close 150ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ── 3. Modal — Scale transition ── */
+@keyframes modal-overlay-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes modal-content-in {
+  0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes modal-content-out {
+  0% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.95) translateY(8px); }
+}
+.pw-modal-enter { animation: modal-overlay-in 200ms ease both; }
+.pw-modal-enter > .pw-modal-content { animation: modal-content-in 250ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ── 4. Panel Reveal — Slide from side ── */
+@keyframes panel-slide-in {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(0); }
+}
+@keyframes panel-slide-out {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+.pw-panel-enter { animation: panel-slide-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.pw-panel-leave { animation: panel-slide-out 200ms cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+/* ── 5. Skeleton Loader — Pulse to content cross-fade ── */
+@keyframes skeleton-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+.pw-skeleton {
+  background: linear-gradient(90deg, #1e1d22 25%, #2a2930 50%, #1e1d22 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ── 6. Number Pop-in — Digit flip with blur and stagger ── */
+@keyframes number-pop-in {
+  0% { transform: translateY(20px); opacity: 0; filter: blur(4px); }
+  100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+.pw-number-enter {
+  animation: number-pop-in 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.pw-number-enter:nth-child(2) { animation-delay: 50ms; }
+.pw-number-enter:nth-child(3) { animation-delay: 100ms; }
+.pw-number-enter:nth-child(4) { animation-delay: 150ms; }
+.pw-number-enter:nth-child(5) { animation-delay: 200ms; }
+
+/* ── 7. Success Check — Blur and rotate ── */
+@keyframes success-checkmark {
+  0% { transform: rotate(-45deg) scale(0); opacity: 0; }
+  50% { transform: rotate(-45deg) scale(1.2); opacity: 1; }
+  100% { transform: rotate(-45deg) scale(1); opacity: 1; }
+}
+@keyframes success-circle {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pw-success-enter .pw-success-circle {
+  animation: success-circle 300ms cubic-bezier(0.34, 1.36, 0.64, 1) both;
+}
+.pw-success-enter .pw-success-checkmark {
+  animation: success-checkmark 400ms 150ms cubic-bezier(0.34, 1.36, 0.64, 1) both;
+}
+
+/* ── 8. Error Shake ── */
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+.pw-error-shake {
+  animation: error-shake 500ms cubic-bezier(0.36, 0, 0.66, 1) both;
+}
+
+/* ── 9. Card Hover Lift ── */
+.pw-card-hover {
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pw-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ── 10. Stagger List Items ── */
+@keyframes list-item-in {
+  0% { opacity: 0; transform: translateX(-12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.pw-stagger > * {
+  animation: list-item-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.pw-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.pw-stagger > *:nth-child(2) { animation-delay: 40ms; }
+.pw-stagger > *:nth-child(3) { animation-delay: 80ms; }
+.pw-stagger > *:nth-child(4) { animation-delay: 120ms; }
+.pw-stagger > *:nth-child(5) { animation-delay: 160ms; }
+.pw-stagger > *:nth-child(6) { animation-delay: 200ms; }
+.pw-stagger > *:nth-child(7) { animation-delay: 240ms; }
+.pw-stagger > *:nth-child(8) { animation-delay: 280ms; }
+
+/* ── 11. Fade In Up (general) ── */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.pw-fade-in-up {
+  animation: fade-in-up 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── 12. Scale In ── */
+@keyframes scale-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pw-scale-in {
+  animation: scale-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── 13. Status Pulse ── */
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+.pw-status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}

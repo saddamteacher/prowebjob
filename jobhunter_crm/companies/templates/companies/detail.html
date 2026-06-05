@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}{{ company.name }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}Kompaniya tafsiloti{% endblock %}
+{% block content %}
+<div class="page-head"><div><a class="page-subtitle" href="{% url 'companies:list' %}">Kompaniyalarga qaytish</a><h1 class="page-title" style="margin-top:8px;">{{ company.name }}</h1><p class="page-subtitle">{{ company.company_type|default:"Kompaniya turi aniqlanmagan" }}</p></div><div class="page-actions">{% if company.is_top %}<span class="badge badge-green">TOP kompaniya</span>{% endif %}{% if company.checked_by_ai %}<span class="badge badge-blue">AI tekshirilgan</span>{% endif %}</div></div>
+{% if company.notes %}<section class="card card-pad">{{ company.notes }}</section>{% endif %}
+<section class="card section-gap"><div class="card-pad"><h2 class="card-title">Vakansiyalar</h2><p class="card-subtitle">{{ vacancies|length }} ta natija</p></div><div class="list">{% for v in vacancies %}<a class="list-row" href="{% url 'vacancies:detail' v.id %}"><span class="logo-chip">{{ v.source|slice:":2"|upper }}</span><div class="list-row-main"><div class="list-row-title">{{ v.title }}</div><div class="list-row-meta">{{ v.source }} · {{ v.created_at|date:"Y-m-d" }}</div></div><strong class="text-accent">{{ v.score }}</strong></a>{% empty %}<div class="empty">Vakansiyalar yo'q.</div>{% endfor %}</div></section>
+{% endblock %}
