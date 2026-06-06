@@ -36,11 +36,40 @@ else
     ok "Docker allaqachon o'rnatilgan: $(docker --version)"
 fi
 
-# ── 3. Project directory ──────────────────────────────────────
+# ── 2.5 Firewall — port 80 ochish (Oracle Cloud / Ubuntu) ─────
+info "Port 80 ochilmoqda..."
+# Oracle/Ubuntu iptables standart REJECT qoidasini chetlab o'tish
+iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT 2>/dev/null || true
+# Qoidani saqlash (qayta yuklanganda yo'qolmasligi uchun)
+if command -v netfilter-persistent &> /dev/null; then
+    netfilter-persistent save 2>/dev/null || true
+else
+    apt-get install -y iptables-persistent -qq 2>/dev/null || true
+    netfilter-persistent save 2>/dev/null || true
+fi
+# UFW bo'lsa ham ochish
+if command -v ufw &> /dev/null; then
+    ufw allow 80/tcp 2>/dev/null || true
+fi
+ok "Port 80 ochildi"
+
+# ── 3. Project — GitHub'dan clone/pull ────────────────────────
 PROJECT_DIR="/opt/proweb-hr"
-info "Loyiha papkasi: $PROJECT_DIR"
-mkdir -p "$PROJECT_DIR"
-cd "$PROJECT_DIR"
+REPO_URL="https://github.com/saddamteacher/prowebjob.git"
+
+if ! command -v git &> /dev/null; then
+    apt-get install -y git -qq
+fi
+
+if [ -d "$PROJECT_DIR/.git" ]; then
+    info "Loyiha yangilanmoqda (git pull)..."
+    cd "$PROJECT_DIR" && git pull
+else
+    info "Loyiha yuklanmoqda (git clone)..."
+    git clone "$REPO_URL" "$PROJECT_DIR"
+    cd "$PROJECT_DIR"
+fi
+ok "Loyiha kodi tayyor"
 
 # ── 4. .env file ──────────────────────────────────────────────
 if [ ! -f ".env" ]; then
