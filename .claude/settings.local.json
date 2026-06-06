@@ -35,7 +35,18 @@
       "WebFetch(domain:fly.io)",
       "mcp__Claude_in_Chrome__javascript_tool",
       "Bash(curl -s \"http://127.0.0.1:8000/static/css/app.css\")",
-      "Bash(git commit -q -m 'Railway deploy konfiguratsiyasi + scrollbar fix *)"
+      "Bash(git commit -q -m 'Railway deploy konfiguratsiyasi + scrollbar fix *)",
+      "Bash(cd /tmp)",
+      "Bash(curl -L -o coursework.docx \"https://intranet.wiut.uz/Uploads/CourseworkDescriptionFiles/550c7d0f-a146-4903-a24d-82c77f06b498.docx\")",
+      "Bash(extract-text coursework.docx)",
+      "Bash(pandoc coursework.docx -t plain)",
+      "Bash(python3 -c ' *)",
+      "Bash(mkdir -p /d/ADS_Coursework && echo \"done\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://127.0.0.1:8000/dashboard/)",
+      "mcp__Claude_in_Chrome__navigate",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://127.0.0.1:8000/vacancies/)",
+      "Bash(curl -s -o /dev/null -w \"clear: HTTP %{http_code}\" \"http://127.0.0.1:8000/vacancies/clear/\")",
+      "Bash(git commit -q -m 'Parserlar kengaytirildi + vakansiya tozalash tugmasi *)"
     ]
   }
 }

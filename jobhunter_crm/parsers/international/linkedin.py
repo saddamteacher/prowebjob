@@ -1,22 +1,26 @@
-"""LinkedIn public search parser — multi-category queries."""
+"""LinkedIn guest jobs API parser — pagination + 30 kun."""
 
 from bs4 import BeautifulSoup
 
 from parsers.base import BaseParser, ParserError
 
-BASE_URL = "https://www.linkedin.com"
+# LinkedIn ochiq (guest) jobs API — pagination'ni qo'llab-quvvatlaydi
+API_URL = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
 
 SEARCH_QUERIES = [
-    "data analyst",
-    "data scientist",
-    "python developer",
-    "frontend developer",
-    "ui ux designer",
-    "smm manager",
+    "data analyst", "business analyst", "data scientist",
+    "python developer", "backend developer",
+    "frontend developer", "react developer", "fullstack developer",
+    "ui ux designer", "product designer", "graphic designer",
+    "smm manager", "digital marketing", "marketing specialist",
+    "qa engineer", "devops engineer", "project manager",
 ]
 
 
 class LinkedInParser(BaseParser):
+    MAX_PAGES = 4        # har so'rov uchun 4 sahifa (25 tadan = 100)
+    PER_PAGE  = 25
+
     def __init__(self):
         super().__init__()
         self.source_name = "linkedin"
@@ -27,27 +31,38 @@ class LinkedInParser(BaseParser):
         seen: set[str] = set()
 
         for query in SEARCH_QUERIES:
-            try:
-                response = self.get(
-                    f"{BASE_URL}/jobs/search",
-                    params={
-                        "keywords": query,
-                        "location": "Uzbekistan",
-                        "f_TPR": "r604800",  # last 7 days
-                    },
-                )
-                if "authwall" in response.text.lower():
-                    raise ParserError("LinkedIn authwall; platforma vaqtincha bloklangan")
+            for page in range(self.MAX_PAGES):
+                try:
+                    response = self.get(
+                        API_URL,
+                        params={
+                            "keywords": query,
+                            "location": "Uzbekistan",
+                            "f_TPR":    "r2592000",   # oxirgi 30 kun (7 emas)
+                            "start":    page * self.PER_PAGE,
+                        },
+                    )
+                except ParserError:
+                    break
 
-                soup = BeautifulSoup(response.text, "lxml")
-                for card in soup.select(".base-card, li"):
+                if "authwall" in response.text.lower():
+                    break
+
+                soup  = BeautifulSoup(response.text, "lxml")
+                cards = soup.select(".base-card, li")
+                if not cards:
+                    break
+
+                new_on_page = 0
+                for card in cards:
                     link = card.select_one("a[href*='/jobs/view']")
                     if not link:
                         continue
-                    url = self.absolute_url(BASE_URL, link.get("href"))
+                    url = self.absolute_url("https://www.linkedin.com", link.get("href"))
                     if not url or url in seen:
                         continue
                     seen.add(url)
+                    new_on_page += 1
 
                     title_el    = card.select_one(".base-search-card__title, h3") or link
                     company_el  = card.select_one(".base-search-card__subtitle, h4")
@@ -65,7 +80,8 @@ class LinkedInParser(BaseParser):
                         "description": card.get_text(" ", strip=True)[:1500],
                         "source":      "LinkedIn",
                     })
-            except ParserError:
-                continue
 
-        return items[:80]
+                if new_on_page == 0:
+                    break
+
+        return items

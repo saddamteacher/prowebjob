@@ -138,6 +138,10 @@ TRANSLATIONS = {
         'vac_badge_remote':   "Remote",
         'vac_no_city':        "Shahar yo'q",
         'vac_no_category':    "—",
+        'vac_btn_clear':      "Tozalash",
+        'vac_clear_all':      "Barchasini tozalash",
+        'vac_clear_filtered': "Filtrlanganni tozalash",
+        'vac_clear_confirm':  "Vakansiyalar o'chirilsinmi? Bu amalni qaytarib bo'lmaydi!",
 
         # ── Vakansiya tafsiloti ─────────────────────────────────
         'vac_detail_salary_none': "Maosh ko'rsatilmagan",
@@ -419,6 +423,10 @@ TRANSLATIONS = {
         'vac_badge_remote':   "Удалённо",
         'vac_no_city':        "Город не указан",
         'vac_no_category':    "—",
+        'vac_btn_clear':      "Очистить",
+        'vac_clear_all':      "Очистить все",
+        'vac_clear_filtered': "Очистить отфильтрованные",
+        'vac_clear_confirm':  "Удалить вакансии? Это действие необратимо!",
 
         # ── Детали вакансии ─────────────────────────────────────
         'vac_detail_salary_none': "Зарплата не указана",

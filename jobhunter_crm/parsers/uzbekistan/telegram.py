@@ -9,6 +9,12 @@ from parsers.base import BaseParser, ParserError
 CHANNELS = [
     ('it_jobs_uz',          'it_jobs_uz'),
     ('Uzbekistan_IT_Jobs',  'uzbekistan_it_jobs'),
+    ('ish_top',             'ish_top'),
+    ('vakansiya_uz',        'vakansiya_uz'),
+    ('hh_uz_vacancy',       'hh_uz_vacancy'),
+    ('jobs_in_tashkent',    'jobs_in_tashkent'),
+    ('uzbekistan_jobs',     'uzbekistan_jobs'),
+    ('IT_vakansiya',        'it_vakansiya'),
 ]
 
 BASE_URL = "https://t.me/s"

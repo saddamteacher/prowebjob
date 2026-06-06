@@ -5,6 +5,7 @@ app_name = 'vacancies'
 
 urlpatterns = [
     path('', views.vacancy_list, name='list'),
+    path('clear/', views.vacancy_clear, name='clear'),
     path('<int:pk>/', views.vacancy_detail, name='detail'),
     path('<int:pk>/delete/', views.vacancy_delete, name='delete'),
     path('<int:pk>/check-ai/', views.check_company_ai, name='check_ai'),

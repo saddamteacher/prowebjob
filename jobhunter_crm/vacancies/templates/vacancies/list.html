@@ -27,6 +27,41 @@
     <a class="btn btn-secondary" href="{% url 'vacancies:categories' %}">
       <span class="nav-icon" style="font-size:15px">category</span>{{ t.vac_btn_categories }}
     </a>
+    <!-- Tozalash dropdown -->
+    <div x-data="{ open: false }" style="position:relative;">
+      <button type="button" class="btn btn-danger" @click="open = !open">
+        <span class="nav-icon" style="font-size:15px">delete_sweep</span>{{ t.vac_btn_clear }}
+        <span class="nav-icon" style="font-size:14px">expand_more</span>
+      </button>
+      <div x-show="open" @click.outside="open = false" x-transition
+           style="position:absolute;right:0;top:calc(100%+6px);z-index:50;min-width:230px;
+                  background:#14161b;border:1px solid rgba(255,255,255,.1);border-radius:10px;
+                  padding:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;" x-cloak>
+        {% if selected_category or selected_source or q %}
+        <form method="post" action="{% url 'vacancies:clear' %}"
+              onsubmit="return confirm('{{ t.vac_clear_confirm }}')">
+          {% csrf_token %}
+          <input type="hidden" name="scope" value="filtered">
+          <input type="hidden" name="category" value="{{ selected_category }}">
+          <input type="hidden" name="source" value="{{ selected_source }}">
+          <button type="submit" class="btn btn-ghost" style="width:100%;justify-content:flex-start;font-size:12px;">
+            <span class="nav-icon" style="font-size:15px;color:var(--warning)">filter_alt_off</span>
+            {{ t.vac_clear_filtered }}
+          </button>
+        </form>
+        <div style="height:1px;background:rgba(255,255,255,.06);margin:4px 0;"></div>
+        {% endif %}
+        <form method="post" action="{% url 'vacancies:clear' %}"
+              onsubmit="return confirm('{{ t.vac_clear_confirm }}')">
+          {% csrf_token %}
+          <input type="hidden" name="scope" value="all">
+          <button type="submit" class="btn btn-ghost" style="width:100%;justify-content:flex-start;font-size:12px;color:var(--danger);">
+            <span class="nav-icon" style="font-size:15px;color:var(--danger)">delete_forever</span>
+            {{ t.vac_clear_all }} ({{ vacancies|length }})
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 

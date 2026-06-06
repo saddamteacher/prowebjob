@@ -107,6 +107,46 @@ def vacancy_delete(request, pk):
 
 
 @login_required(login_url='core:login')
+def vacancy_clear(request):
+    """Vakansiyalarni tozalash — filtrlangan yoki barchasini."""
+    if request.method != 'POST':
+        return redirect('vacancies:list')
+
+    qs = Vacancy.objects.all()
+    category = request.POST.get('category', '')
+    source   = request.POST.get('source', '')
+    scope    = request.POST.get('scope', 'all')
+
+    # Faqat filtrlanganlarni tozalash
+    if scope == 'filtered':
+        if category:
+            qs = qs.filter(category__slug=category)
+        if source:
+            qs = qs.filter(source__iexact=source)
+
+    count = qs.count()
+    qs.delete()
+
+    # Loglarga yozish
+    from logs_app.models import ActivityLog
+    ActivityLog.objects.create(
+        level='warning', source='system',
+        message=f"{count} ta vakansiya tozalandi ({'filtrlangan' if scope == 'filtered' else 'barchasi'})",
+        user=request.user,
+    )
+    messages.success(request, f"{count} ta vakansiya o'chirildi.")
+
+    # Filtrlangan bo'lsa, filtrni saqlab qaytar
+    if scope == 'filtered':
+        params = []
+        if category: params.append(f'category={category}')
+        if source:   params.append(f'source={source}')
+        qstr = '?' + '&'.join(params) if params else ''
+        return redirect(f"{request.path.replace('clear/', '')}{qstr}")
+    return redirect('vacancies:list')
+
+
+@login_required(login_url='core:login')
 def category_list(request):
     categories = Category.objects.annotate(
         vacancy_count=Count('vacancies')

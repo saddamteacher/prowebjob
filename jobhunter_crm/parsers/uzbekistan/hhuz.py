@@ -52,60 +52,74 @@ class HHUZParser(BaseParser):
         self.source_name = "hhuz"
         self.display_name = "HH.UZ"
 
+    # Har so'rov uchun nechta sahifa olish (har sahifada ~20 ta)
+    MAX_PAGES = 4
+
     def parse(self) -> list[dict]:
         items = []
         seen: set[str] = set()
 
         for query in CATEGORY_QUERIES:
-            try:
-                response = self.get(
-                    f"{BASE_URL}/search/vacancy",
-                    params={
-                        "text":           query,
-                        "area":           97,        # Uzbekistan
-                        "search_field":   "name",    # title only — precision
-                        "order_by":       "publication_time",
-                        "period":         7,         # last 7 days
-                    },
-                )
-                soup = BeautifulSoup(response.text, "lxml")
-                cards = soup.select("[data-qa='vacancy-serp__vacancy']")
+            for page in range(self.MAX_PAGES):
+                try:
+                    response = self.get(
+                        f"{BASE_URL}/search/vacancy",
+                        params={
+                            "text":         query,
+                            "area":         97,        # Uzbekistan
+                            "search_field": "name",    # sarlavhada — aniqlik
+                            "order_by":     "publication_time",
+                            "period":       30,        # oxirgi 30 kun (7 emas)
+                            "page":         page,      # pagination
+                            "items_on_page": 100,      # har sahifada ko'proq
+                        },
+                    )
+                    soup = BeautifulSoup(response.text, "lxml")
+                    cards = soup.select("[data-qa='vacancy-serp__vacancy']")
 
-                for card in cards:
-                    title_el = card.select_one("[data-qa='serp-item__title']")
-                    if not title_el:
-                        continue
-                    url = self._canonical_url(title_el.get("href"))
-                    if not url or url in seen:
-                        continue
-                    seen.add(url)
+                    if not cards:
+                        break  # bu so'rov tugadi, keyingisiga o't
 
-                    employer_el = card.select_one("[data-qa='vacancy-serp__vacancy-employer']")
-                    salary_el   = card.select_one("[data-qa='vacancy-serp__vacancy-compensation']")
-                    city_el     = card.select_one("[data-qa='vacancy-serp__vacancy-address']")
+                    new_on_page = 0
+                    for card in cards:
+                        title_el = card.select_one("[data-qa='serp-item__title']")
+                        if not title_el:
+                            continue
+                        url = self._canonical_url(title_el.get("href"))
+                        if not url or url in seen:
+                            continue
+                        seen.add(url)
+                        new_on_page += 1
 
-                    # Get snippet for description
-                    snippet_el = card.select_one("[data-qa='vacancy-serp__vacancy_snippet']")
-                    description = snippet_el.get_text(" ", strip=True) if snippet_el else ""
-                    if not description:
-                        description = card.get_text(" ", strip=True)[:1500]
+                        employer_el = card.select_one("[data-qa='vacancy-serp__vacancy-employer']")
+                        salary_el   = card.select_one("[data-qa='vacancy-serp__vacancy-compensation']")
+                        city_el     = card.select_one("[data-qa='vacancy-serp__vacancy-address']")
 
-                    title = title_el.get_text(" ", strip=True)
-                    if len(title) < 3:
-                        continue
+                        snippet_el = card.select_one("[data-qa='vacancy-serp__vacancy_snippet']")
+                        description = snippet_el.get_text(" ", strip=True) if snippet_el else ""
+                        if not description:
+                            description = card.get_text(" ", strip=True)[:1500]
 
-                    items.append({
-                        "title":       title,
-                        "company":     employer_el.get_text(" ", strip=True) if employer_el else "Unknown",
-                        "salary":      salary_el.get_text(" ", strip=True) if salary_el else None,
-                        "city":        city_el.get_text(" ", strip=True) if city_el else "Tashkent",
-                        "url":         url,
-                        "description": description[:2000],
-                        "source":      "HH.UZ",
-                    })
+                        title = title_el.get_text(" ", strip=True)
+                        if len(title) < 3:
+                            continue
 
-            except ParserError:
-                continue  # skip failed queries
+                        items.append({
+                            "title":       title,
+                            "company":     employer_el.get_text(" ", strip=True) if employer_el else "Unknown",
+                            "salary":      salary_el.get_text(" ", strip=True) if salary_el else None,
+                            "city":        city_el.get_text(" ", strip=True) if city_el else "Tashkent",
+                            "url":         url,
+                            "description": description[:2000],
+                            "source":      "HH.UZ",
+                        })
+
+                    # Agar sahifada yangi vakansiya bo'lmasa — keyingi so'rovga
+                    if new_on_page == 0:
+                        break
+
+                except ParserError:
+                    break  # bu so'rov xato berdi, keyingisiga o't
 
         return items
 

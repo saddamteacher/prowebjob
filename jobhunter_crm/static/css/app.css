@@ -50,6 +50,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 a { color: inherit; text-decoration: none; }
+[x-cloak] { display: none !important; }
 button, input, select, textarea { font: inherit; }
 select { color-scheme: dark; }
 select option { background: #111317; color: #fff; }
