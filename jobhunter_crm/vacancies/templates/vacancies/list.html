@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n_extras %}
 {% block title %}{{ t.vac_title }} - PROWEB HR{% endblock %}
 {% block breadcrumb %}{{ t.vac_title }}{% endblock %}
 {% block content %}
@@ -75,7 +76,7 @@
     <select name="category">
       <option value="">{{ t.btn_all|slice:":-2" }}</option>
       {% for cat in categories %}
-      <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+      <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat|cat_name:current_lang }}</option>
       {% endfor %}
     </select>
   </div>
@@ -119,7 +120,7 @@
         {{ v.company_name }} · {{ v.city|default:t.vac_no_city }} · {{ v.source }}{% if v.salary %} · {{ v.salary }}{% endif %}
       </div>
     </div>
-    <span class="badge badge-gray" style="font-size:9px;white-space:nowrap;">{{ v.category.name|default:t.vac_no_category }}</span>
+    <span class="badge badge-gray" style="font-size:9px;white-space:nowrap;">{% if v.category %}{{ v.category|cat_name:current_lang }}{% else %}{{ t.vac_no_category }}{% endif %}</span>
     <strong style="font-size:13px;min-width:28px;text-align:right;{% if v.score >= 90 %}color:var(--accent){% elif v.score >= 70 %}color:#67b7ff{% else %}color:var(--muted){% endif %}">{{ v.score }}</strong>
     <a class="btn btn-secondary" href="{% url 'vacancies:detail' v.id %}" style="min-height:30px;padding:5px 12px;font-size:11px;">{{ t.btn_open }}</a>
   </div>

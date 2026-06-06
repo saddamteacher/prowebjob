@@ -577,6 +577,31 @@ TRANSLATIONS = {
 }
 
 
+# ═══════════════════════════════════════════════════════════════════
+# Kategoriya (yo'nalish) nomlari — slug bo'yicha UZ / RU
+# ═══════════════════════════════════════════════════════════════════
+CATEGORY_NAMES = {
+    'data_analyst':   {'uz': "Data Analyst",        'ru': "Аналитик данных"},
+    'data_science':   {'uz': "Data Science",        'ru': "Data Science"},
+    'python':         {'uz': "Python",              'ru': "Python разработка"},
+    'frontend':       {'uz': "Frontend",            'ru': "Frontend разработка"},
+    'smm':            {'uz': "SMM marketing",       'ru': "SMM маркетинг"},
+    'mobilograf':     {'uz': "Mobilografiya",       'ru': "Мобилография"},
+    'graphic_design': {'uz': "Grafik dizayn",       'ru': "Графический дизайн"},
+    '3d_max':         {'uz': "3D Max & AutoCAD",    'ru': "3D Max и AutoCAD"},
+    'blender':        {'uz': "Blender 3D",          'ru': "Blender 3D"},
+    'ms_office':      {'uz': "MS Office",           'ru': "MS Office"},
+}
+
+
+def get_category_name(slug: str, lang: str = 'uz', fallback: str = '') -> str:
+    """Slug bo'yicha kategoriya nomini berilgan tilda qaytaradi."""
+    entry = CATEGORY_NAMES.get(slug)
+    if entry:
+        return entry.get(lang, entry.get('uz', fallback))
+    return fallback or slug.replace('_', ' ').title()
+
+
 def get_translations(lang: str) -> dict:
     """Return translation dict for given language code."""
     return TRANSLATIONS.get(lang, TRANSLATIONS['uz'])

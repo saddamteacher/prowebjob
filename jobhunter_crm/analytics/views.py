@@ -54,7 +54,9 @@ def analytics_index(request):
         .annotate(total=Count('vacancies'), week=Count('vacancies', filter=Q(vacancies__created_at__gte=week_ago)))
         .order_by('-total')
     )
-    cat_labels = [c.name  for c in cats]
+    from core.translations import get_category_name
+    _lang = request.session.get('lang', 'uz')
+    cat_labels = [get_category_name(c.slug, _lang, c.name) for c in cats]
     cat_data   = [c.total for c in cats]
     cat_week   = [c.week  for c in cats]
 

@@ -1,7 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}Yo'nalishlar - PROWEB HR{% endblock %}
-{% block breadcrumb %}Yo'nalishlar{% endblock %}
+{% load i18n_extras %}
+{% block title %}{{ t.cat_title }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.cat_title }}{% endblock %}
 {% block content %}
-<div class="page-head"><div><h1 class="page-title">Yo'nalishlar</h1><p class="page-subtitle">Parser saqlaydigan faol kategoriyalar.</p></div><div class="page-actions"><a class="btn btn-secondary" href="{% url 'vacancies:list' %}">Vakansiyalar</a></div></div>
-<div class="grid grid-3">{% for cat in categories %}<section class="card card-pad"><div class="card-head"><span class="logo-chip">{% if cat.icon_url %}<img src="{{ cat.icon_url }}" alt="">{% else %}{{ cat.name|slice:":2"|upper }}{% endif %}</span><span class="badge {% if cat.is_active %}badge-green{% else %}badge-gray{% endif %}">{% if cat.is_active %}Aktiv{% else %}O'chirilgan{% endif %}</span></div><h2 class="card-title">{{ cat.name }}</h2><p class="card-subtitle">{{ cat.vacancy_count }} ta vakansiya</p><div class="metric-row section-gap"><span class="metric-label">Kunlik limit</span><strong>{{ cat.daily_limit }}</strong></div><div class="page-actions section-gap"><a class="btn btn-secondary" href="{% url 'vacancies:category_edit' cat.id %}">Limit</a><a class="btn {% if cat.is_active %}btn-danger{% else %}btn-primary{% endif %}" href="{% url 'vacancies:category_toggle' cat.id %}">{% if cat.is_active %}O'chirish{% else %}Yoqish{% endif %}</a></div></section>{% empty %}<div class="card empty">Yo'nalishlar yo'q.</div>{% endfor %}</div>
+<div class="page-head">
+  <div>
+    <h1 class="page-title">{{ t.cat_title }}</h1>
+    <p class="page-subtitle">{% if current_lang == 'ru' %}Активные категории парсера.{% else %}Parser saqlaydigan faol kategoriyalar.{% endif %}</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-secondary" href="{% url 'vacancies:list' %}">{{ t.nav_vacancies }}</a>
+  </div>
+</div>
+<div class="grid grid-3">
+  {% for cat in categories %}
+  <section class="card card-pad">
+    <div class="card-head">
+      <span class="logo-chip">{% if cat.icon_url %}<img src="{{ cat.icon_url }}" alt="">{% else %}{{ cat.name|slice:":2"|upper }}{% endif %}</span>
+      <span class="badge {% if cat.is_active %}badge-green{% else %}badge-gray{% endif %}">
+        {% if cat.is_active %}{{ t.status_active }}{% else %}{{ t.status_disabled }}{% endif %}
+      </span>
+    </div>
+    <h2 class="card-title">{{ cat|cat_name:current_lang }}</h2>
+    <p class="card-subtitle">{{ cat.vacancy_count }} {{ t.cat_vacancy_count }}</p>
+    <div class="metric-row section-gap">
+      <span class="metric-label">{{ t.cat_daily_limit }}</span>
+      <strong>{{ cat.daily_limit }}</strong>
+    </div>
+    <div class="page-actions section-gap">
+      <a class="btn btn-secondary" href="{% url 'vacancies:category_edit' cat.id %}">{{ t.cat_daily_limit }}</a>
+      <a class="btn {% if cat.is_active %}btn-danger{% else %}btn-primary{% endif %}" href="{% url 'vacancies:category_toggle' cat.id %}">
+        {% if cat.is_active %}{{ t.btn_disable }}{% else %}{{ t.btn_enable }}{% endif %}
+      </a>
+    </div>
+  </section>
+  {% empty %}<div class="card empty">{{ t.empty_data }}</div>{% endfor %}
+</div>
 {% endblock %}

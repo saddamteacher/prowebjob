@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n_extras %}
 {% block title %}{{ v.title }} - PROWEB HR{% endblock %}
 {% block breadcrumb %}{{ t.vac_title }}{% endblock %}
 {% block content %}
@@ -50,7 +51,7 @@
   <div class="card stat"><span class="stat-label">{{ t.lbl_score }}</span><strong class="stat-value {% if v.score >= 80 %}accent{% endif %}">{{ v.score }}</strong></div>
   <div class="card stat"><span class="stat-label">{{ t.lbl_platform }}</span><strong style="font-size:18px;font-weight:700;">{{ v.source }}</strong></div>
   <div class="card stat"><span class="stat-label">{{ t.lbl_city }}</span><strong style="font-size:18px;font-weight:700;">{{ v.city|default:t.vac_detail_city_none }}</strong></div>
-  <div class="card stat"><span class="stat-label">{{ t.lbl_direction }}</span><strong style="font-size:15px;font-weight:700;">{{ v.category.name|default:t.vac_no_category }}</strong></div>
+  <div class="card stat"><span class="stat-label">{{ t.lbl_direction }}</span><strong style="font-size:15px;font-weight:700;">{% if v.category %}{{ v.category|cat_name:current_lang }}{% else %}{{ t.vac_no_category }}{% endif %}</strong></div>
 </div>
 
 <!-- Skills detected -->
