@@ -8,41 +8,53 @@ from parsers.base import BaseParser, ParserError
 
 BASE_URL = "https://tashkent.hh.uz"
 
-# One focused query per major category — title-field search for precision
+# Har kategoriya uchun bir nechta so'rov — barchasiga teng ko'p natija
 CATEGORY_QUERIES = [
-    # Data roles — high priority, often underrepresented
-    "data analyst",
-    "аналитик данных",
-    "BI аналитик",
-    "data scientist",
+    # ── DATA ANALYST ──────────────────────────────────────
+    "data analyst", "аналитик данных", "BI аналитик",
+    "бизнес аналитик", "аналитик", "data analyst junior",
+    "системный аналитик", "продуктовый аналитик",
 
-    # Dev roles
-    "python developer",
-    "python разработчик",
-    "frontend developer",
-    "react developer",
-    "javascript разработчик",
+    # ── DATA SCIENCE ──────────────────────────────────────
+    "data scientist", "machine learning", "ml engineer",
+    "data science", "специалист по данным", "ai engineer",
 
-    # Design
-    "ui ux designer",
-    "графический дизайнер",
-    "figma designer",
+    # ── PYTHON / BACKEND ──────────────────────────────────
+    "python developer", "python разработчик", "django developer",
+    "backend developer", "бэкенд разработчик", "python программист",
+    "fastapi developer",
 
-    # Marketing
-    "smm менеджер",
-    "таргетолог",
-    "контент менеджер",
+    # ── FRONTEND ──────────────────────────────────────────
+    "frontend developer", "react developer", "vue developer",
+    "javascript разработчик", "фронтенд разработчик",
+    "верстальщик", "web developer", "angular developer",
 
-    # Creative
-    "видеограф",
-    "мобилограф",
-    "3ds max",
-    "интерьерный дизайнер",
+    # ── GRAPHIC / UI-UX DESIGN ────────────────────────────
+    "ui ux designer", "графический дизайнер", "figma designer",
+    "веб дизайнер", "дизайнер", "product designer",
+    "motion designer", "брендинг дизайнер",
 
-    # Office
-    "офис менеджер",
-    "оператор пк",
-    "excel специалист",
+    # ── SMM / MARKETING ───────────────────────────────────
+    "smm менеджер", "таргетолог", "контент менеджер",
+    "smm специалист", "интернет маркетолог", "маркетолог",
+    "digital marketing", "seo специалист", "контекстолог",
+
+    # ── MOBILOGRAF / VIDEO ────────────────────────────────
+    "видеограф", "мобилограф", "видеомонтажер",
+    "video editor", "монтажер", "контент мейкер",
+
+    # ── 3D MAX / AUTOCAD ──────────────────────────────────
+    "3ds max", "интерьерный дизайнер", "визуализатор",
+    "autocad", "архитектор", "3d визуализатор", "дизайнер интерьера",
+
+    # ── BLENDER / 3D ART ──────────────────────────────────
+    "blender", "3d artist", "3d моделлер",
+    "3d аниматор", "game designer", "3d дизайнер",
+
+    # ── MS OFFICE / ADMIN ─────────────────────────────────
+    "офис менеджер", "оператор пк", "excel специалист",
+    "секретарь", "администратор", "делопроизводитель",
+    "1с оператор", "ассистент", "data entry",
 ]
 
 
