@@ -52,7 +52,8 @@
       "Bash(curl -s -o /dev/null -w \"categories: HTTP %{http_code}\\\\n\" http://127.0.0.1:8000/vacancies/categories/)",
       "Bash(curl -s -o /dev/null -w \"analytics: HTTP %{http_code}\\\\n\" http://127.0.0.1:8000/analytics/)",
       "Bash(git commit -q -m 'Yo'\\\\''nalish nomlari UZ/RU tarjima qilindi *)",
-      "Bash(git commit -q -m 'setup_server.sh: Oracle Cloud uchun firewall + git clone *)"
+      "Bash(git commit -q -m 'setup_server.sh: Oracle Cloud uchun firewall + git clone *)",
+      "Bash(git commit -q -m 'Gunicorn 1 worker + max-requests — Railway $5 tarifiga moslash *)"
     ]
   }
 }

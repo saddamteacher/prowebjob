@@ -17,9 +17,12 @@ if [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then
 fi
 
 # Gunicorn — $PORT (Railway/Fly dinamik port beradi, default 8000)
+# 1 worker — kam RAM (Railway $5 tarifiga sig'adi)
 exec gunicorn jobhunter_crm.wsgi:application \
   --bind "0.0.0.0:${PORT:-8000}" \
-  --workers 2 \
+  --workers "${WEB_WORKERS:-1}" \
   --timeout 120 \
+  --max-requests 500 \
+  --max-requests-jitter 50 \
   --access-logfile - \
   --error-logfile -
