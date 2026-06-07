@@ -10,10 +10,24 @@ python manage.py migrate --noinput
 # Boshlang'ich ma'lumotlar (platformalar, kategoriyalar)
 python manage.py init_data || true
 
-# Admin foydalanuvchini avtomatik yaratish (agar yo'q bo'lsa)
-# DJANGO_SUPERUSER_USERNAME / _PASSWORD / _EMAIL env'larini fly secrets'ga qo'ying
-if [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then
-  python manage.py createsuperuser --noinput || true
+# Admin foydalanuvchini yaratish YOKI parolini yangilash
+# (env o'zgarsa — mavjud user ham yangilanadi)
+if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
+  python manage.py shell -c "
+import os
+from django.contrib.auth import get_user_model
+U = get_user_model()
+u = os.environ['DJANGO_SUPERUSER_USERNAME']
+p = os.environ['DJANGO_SUPERUSER_PASSWORD']
+e = os.environ.get('DJANGO_SUPERUSER_EMAIL', '')
+obj, _ = U.objects.get_or_create(username=u, defaults={'email': e})
+obj.email = e or obj.email
+obj.is_staff = True
+obj.is_superuser = True
+obj.set_password(p)
+obj.save()
+print(f'Superuser ready: {u}')
+" || true
 fi
 
 # Gunicorn — $PORT (Railway/Fly dinamik port beradi, default 8000)
