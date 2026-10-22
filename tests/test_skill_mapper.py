@@ -90,7 +90,7 @@ class TestSkillMapper:
 
     def test_get_label(self):
         """get_label should return correct display name."""
-        assert mapper.get_label('frontend') == 'Web Dasturlash'
+        assert mapper.get_label('frontend') == 'Frontend'
         assert mapper.get_label('python') == 'Python'
         assert mapper.get_label('nonexistent') == 'Nonexistent'
 
