@@ -11,25 +11,10 @@ TOP_COMPANIES = {
     'ipoteka bank', 'hamkorbank', 'soliq', 'davr bank',
 }
 
-# Only these seniority levels are hard-rejected (lead/director level)
-SENIOR_ONLY_BLOCKLIST = re.compile(
-    r'\b(team\s*lead|tech\s*lead|lead\s+developer|lead\s+engineer|'
-    r'principal|staff\s+engineer|head\s+of|director|'
-    r'vp\s+of|vice\s+president|chief\s+\w+\s+officer|cto|ceo|coo)\b',
-    re.IGNORECASE
-)
-
 # These boost score (entry/junior level)
 JUNIOR_BOOST = re.compile(
     r'\b(junior|intern|trainee|assistant|entry\s*level|beginner|'
     r'начинающ|стажер|помощник|kichik|yordamchi|stajyor)\b',
-    re.IGNORECASE
-)
-
-# Experience requirement patterns — reject only if 3+ years required
-EXPERIENCE_STRICT = re.compile(
-    r'(?:опыт|experience|tajriba)\s*(?:от|from|of)?\s*([3-9]|\d{2,})\s*'
-    r'(?:лет|года|years?|yil)',
     re.IGNORECASE
 )
 
@@ -46,9 +31,8 @@ class VacancyScorer:
       Remote:        +20
       Full desc:     +10
 
-    Rejected (score=0):
-      - Team lead / head of / director in title
-      - Requires 3+ years experience explicitly
+    Seniority is not scored here — it is stored as Vacancy.level
+    (services.level_detector) and filtered by the user.
     """
 
     def score(self, title: str, company: str, salary: str = None,
@@ -57,14 +41,6 @@ class VacancyScorer:
         title_lower = (title or '').lower()
         desc_lower  = (description or '').lower()
         full_text   = f"{title_lower} {desc_lower}"
-
-        # ── Hard reject: lead/director roles ───────────────────────
-        if SENIOR_ONLY_BLOCKLIST.search(title):
-            return 0
-
-        # ── Hard reject: 3+ years experience explicitly required ────
-        if description and EXPERIENCE_STRICT.search(description):
-            return 0
 
         # ── Base score ──────────────────────────────────────────────
         total = 20

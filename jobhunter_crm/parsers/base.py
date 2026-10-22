@@ -7,6 +7,7 @@ import httpx
 
 from services.skill_mapper import SkillMapper
 from services.scorer import VacancyScorer
+from services.level_detector import detect_level, experience_label
 
 skill_mapper = SkillMapper()
 scorer = VacancyScorer()
@@ -32,6 +33,16 @@ class BaseParser(ABC):
         self.source_name = ''
         self.display_name = ''
         self.timeout = 25
+        # Optional search filters (None = everything). Parsers that can
+        # narrow their requests by category/level use these; the engine
+        # filters the results for all parsers anyway.
+        self.categories: set[str] | None = None
+        self.levels: set[str] | None = None
+
+    def configure(self, categories=None, levels=None) -> 'BaseParser':
+        self.categories = set(categories) if categories else None
+        self.levels = set(levels) if levels else None
+        return self
 
     def get(self, url: str, **kwargs) -> httpx.Response:
         """Fetch a URL with consistent headers and clear errors."""
@@ -83,6 +94,10 @@ class BaseParser(ABC):
             city=raw.get('city'),
             description=desc,
         )
+        experience_code = raw.get('experience_code')
+        level = detect_level(title, desc, experience_code)
+        experience = experience_label(title, desc, experience_code)
+
         is_remote = False
         if raw.get('city') and 'remote' in raw['city'].lower():
             is_remote = True
@@ -99,5 +114,7 @@ class BaseParser(ABC):
             'source': raw.get('source', self.display_name),
             'category_slug': category_slug,
             'score': score,
+            'level': level,
+            'experience': experience,
             'is_remote': is_remote,
         }

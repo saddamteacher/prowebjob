@@ -19,8 +19,8 @@ class SkillAdmin(admin.ModelAdmin):
 
 @admin.register(Vacancy)
 class VacancyAdmin(admin.ModelAdmin):
-    list_display = ['title', 'company_name', 'category', 'source', 'score', 'created_at']
-    list_filter = ['source', 'category', 'is_sent', 'is_remote']
+    list_display = ['title', 'company_name', 'category', 'level', 'source', 'score', 'created_at']
+    list_filter = ['level', 'source', 'category', 'is_sent', 'is_remote']
     search_fields = ['title', 'company_name', 'description']
     date_hierarchy = 'created_at'
     readonly_fields = ['created_at', 'updated_at']

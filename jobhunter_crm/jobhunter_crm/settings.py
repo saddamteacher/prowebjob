@@ -18,6 +18,9 @@ if _railway_domain:
     ALLOWED_HOSTS.append(_railway_domain)
     CSRF_TRUSTED_ORIGINS = [f'https://{_railway_domain}']
 
+# Windows desktop build (desktop/launcher.py): local single-user install.
+DESKTOP_MODE = os.getenv('PROWEBHR_DESKTOP', 'False').lower() in ('true', '1', 'yes')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,6 +41,7 @@ INSTALLED_APPS = [
     'settings_app',
     'logs_app',
     'scheduler',
+    'search',
 ]
 
 MIDDLEWARE = [
@@ -80,6 +84,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': DATABASE_PATH,
+        # Background search jobs write while pages read — wait for the lock.
+        'OPTIONS': {'timeout': 20},
     }
 }
 
@@ -101,7 +107,7 @@ STATIC_ROOT   = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL  = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(os.getenv('MEDIA_ROOT', BASE_DIR / 'media'))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -166,7 +172,9 @@ LOGGING = {
 }
 
 # ─── Security (production) ────────────────────────────────────────
-if not DEBUG:
+# The desktop build serves plain http://127.0.0.1, where Secure cookies would
+# never be sent back (login would silently fail).
+if not DEBUG and not DESKTOP_MODE:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE   = True
     CSRF_COOKIE_SECURE      = True

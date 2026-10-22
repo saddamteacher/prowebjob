@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load i18n_extras %}
+{% block title %}{{ t.search_result }} #{{ job.pk }} - PROWEB HR{% endblock %}
+{% block breadcrumb %}{{ t.search_title }}{% endblock %}
+{% block content %}
+<style>
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted)}
+.plat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.plat-row:last-child{border-bottom:0}
+.plat-row img{width:18px;height:18px;border-radius:4px}
+.plat-state{margin-left:auto;display:flex;align-items:center;gap:8px}
+.spin{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid rgba(201,243,28,.25);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.lvl-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.lvl-tab{font-size:12px;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1);color:var(--muted);text-decoration:none}
+.lvl-tab.active{background:var(--accent);border-color:var(--accent);color:#111;font-weight:700}
+.vac-list{background:rgba(10,11,15,.8);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden}
+.vac-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
+.vac-row:hover{background:rgba(201,243,28,.03)}
+.vac-row:last-child{border-bottom:0}
+.lvl{font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.lvl-junior{background:rgba(201,243,28,.12);color:var(--accent)}
+.lvl-middle{background:rgba(103,183,255,.12);color:#67b7ff}
+.lvl-senior{background:rgba(255,184,107,.12);color:#ffb86b}
+.pager{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--muted)}
+.job-panels{grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:16px}
+@media (max-width:760px){.job-panels{grid-template-columns:1fr}.vac-row{flex-wrap:wrap}.vac-row .vac-main{flex-basis:100%}}
+</style>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">{{ t.search_result }} #{{ job.pk }}</h1>
+    <p class="page-subtitle">{{ job.created_at|date:"d.m.Y H:i" }}{% if job.created_by %} · {{ job.created_by.username }}{% endif %}</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-secondary" href="{% url 'search:index' %}">
+      <span class="nav-icon" style="font-size:15px">tune</span>{{ t.search_again }}
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="card stat">
+    <span class="stat-label">{{ t.search_found }}</span>
+    <span class="stat-value accent" id="st-found">{{ job.found_ids|length }}</span>
+  </div>
+  <div class="card stat">
+    <span class="stat-label">{{ t.search_new }}</span>
+    <span class="stat-value" id="st-new">{{ job.new_count }}</span>
+  </div>
+  <div class="card stat">
+    <span class="stat-label">{{ t.search_progress }}</span>
+    <span class="stat-value"><span id="st-done">{{ job.done_platforms }}</span><span style="font-size:18px;color:var(--muted)"> / {{ job.platforms|length }}</span></span>
+  </div>
+  <div class="card stat">
+    <span class="stat-label">{{ t.search_duration }}</span>
+    <span class="stat-value"><span id="st-dur">{{ job.duration_seconds|default:"0" }}</span><span style="font-size:18px;color:var(--muted)"> {{ t.search_sec }}</span></span>
+  </div>
+</div>
+
+<div class="grid section-gap job-panels">
+  <section class="card card-pad">
+    <div class="card-head" style="margin-bottom:10px;">
+      <h2 class="card-title">{{ t.search_progress }}</h2>
+      <span class="badge {% if job.status == 'done' %}badge-green{% elif job.status == 'error' %}badge-red{% else %}badge-yellow{% endif %}">
+        {% if job.status == 'done' %}{{ t.search_status_done }}{% elif job.status == 'error' %}{{ t.search_status_error }}{% elif job.status == 'running' %}{{ t.search_status_running }}{% else %}{{ t.search_status_pending }}{% endif %}
+      </span>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:10px;"><div class="progress-bar" id="st-bar" style="width:{{ job.progress_percent }}%"></div></div>
+    {% if job.is_active %}<p style="font-size:11px;color:var(--muted);margin:0 0 8px;">{{ t.search_wait }}</p>{% endif %}
+    {% if job.error %}<div class="alert alert-error" style="font-size:12px;">{{ job.error }}</div>{% endif %}
+    {% for p in platform_rows %}
+    <div class="plat-row" data-slug="{{ p.slug }}">
+      {% if p.icon_url %}<img src="{{ p.icon_url }}" alt="">{% endif %}
+      <span>{{ p.name }}</span>
+      <span class="plat-state">
+        {% if p.state == 'done' %}
+          <span>{{ p.found }} · <span class="text-accent">+{{ p.new }}</span></span>
+          <span class="nav-icon" style="font-size:16px;color:var(--accent)">check_circle</span>
+        {% elif p.state == 'error' %}
+          <span class="text-danger" title="{{ p.error }}" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.error|default:t.search_status_error }}</span>
+          <span class="nav-icon" style="font-size:16px;color:var(--danger)">error</span>
+        {% elif job.is_active %}
+          <span class="spin" aria-label="{{ t.search_status_running }}"></span>
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </span>
+    </div>
+    {% endfor %}
+  </section>
+
+  <section class="card card-pad">
+    <div class="card-head" style="margin-bottom:12px;"><h2 class="card-title">{{ t.search_filters }}</h2></div>
+    <p class="metric-label" style="margin:0 0 6px;">{{ t.search_courses }}</p>
+    <div class="chips" style="margin-bottom:12px;">
+      {% for slug in job.categories %}<span class="chip">{{ slug|cat_name_by_slug:current_lang }}</span>{% endfor %}
+    </div>
+    <p class="metric-label" style="margin:0 0 6px;">{{ t.search_platforms }}</p>
+    <div class="chips" style="margin-bottom:12px;">
+      {% for p in platform_rows %}<span class="chip">{{ p.name }}</span>{% endfor %}
+    </div>
+    <p class="metric-label" style="margin:0 0 6px;">{{ t.search_levels }}</p>
+    <div class="chips">
+      {% for value, label in levels %}<span class="lvl lvl-{{ value }}">{{ label }}</span>{% endfor %}
+    </div>
+  </section>
+</div>
+
+<div class="section-gap">
+  {% if levels|length > 1 %}
+  <div class="lvl-tabs">
+    <a class="lvl-tab {% if not selected_level %}active{% endif %}" href="?">{{ t.search_all_levels }}</a>
+    {% for value, label in levels %}
+    <a class="lvl-tab {% if selected_level == value %}active{% endif %}" href="?level={{ value }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="vac-list">
+    {% for v in page %}
+    <div class="vac-row">
+      <span class="lvl lvl-{{ v.level }}">{{ v.get_level_display }}</span>
+      <div class="vac-main" style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ v.title }}
+          {% if v.is_remote %}<span class="badge badge-green" style="margin-left:6px;font-size:9px;">{{ t.vac_badge_remote }}</span>{% endif %}
+        </div>
+        <div style="color:var(--muted-2);font-size:11px;margin-top:3px;">
+          {{ v.company_name }} · {{ v.city|default:t.vac_no_city }} · {{ v.source }}{% if v.salary %} · {{ v.salary }}{% endif %}{% if v.experience %} · {{ t.lbl_experience }}: {{ v.experience }} {{ t.lbl_years }}{% endif %}
+        </div>
+      </div>
+      <span class="badge badge-gray" style="font-size:9px;white-space:nowrap;">{% if v.category %}{{ v.category|cat_name:current_lang }}{% else %}{{ t.vac_no_category }}{% endif %}</span>
+      <strong style="font-size:13px;min-width:28px;text-align:right;{% if v.score >= 90 %}color:var(--accent){% elif v.score >= 70 %}color:#67b7ff{% else %}color:var(--muted){% endif %}">{{ v.score }}</strong>
+      <a class="btn btn-secondary" href="{% url 'vacancies:detail' v.id %}" style="min-height:30px;padding:5px 12px;font-size:11px;">{{ t.btn_open }}</a>
+    </div>
+    {% empty %}
+    <div class="empty" style="padding:48px;">
+      <span class="nav-icon" style="font-size:44px;display:block;margin-bottom:12px;color:var(--muted-2)">{% if job.is_active %}hourglass_top{% else %}search_off{% endif %}</span>
+      {% if job.is_active %}{{ t.search_wait }}{% else %}{{ t.search_empty }}{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page.paginator.num_pages > 1 %}
+  <div class="pager">
+    {% if page.has_previous %}<a class="btn btn-ghost" href="?{% if selected_level %}level={{ selected_level }}&{% endif %}page={{ page.previous_page_number }}">‹</a>{% endif %}
+    <span>{{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="btn btn-ghost" href="?{% if selected_level %}level={{ selected_level }}&{% endif %}page={{ page.next_page_number }}">›</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% if job.is_active %}
+<script>
+(function () {
+  var url = "{% url 'search:status' job.pk %}";
+  var shownDone = {{ job.done_platforms }};
+  function tick() {
+    fetch(url, {credentials: 'same-origin'})
+      .then(function (r) { return r.json(); })
+      .then(function (s) {
+        document.getElementById('st-found').textContent = s.found;
+        document.getElementById('st-new').textContent = s['new'];
+        document.getElementById('st-done').textContent = s.done_platforms;
+        document.getElementById('st-dur').textContent = s.duration || 0;
+        document.getElementById('st-bar').style.width = s.progress + '%';
+        // Reload when a platform finishes (new results) or the job ends.
+        if (s.done_platforms !== shownDone || (s.status !== 'running' && s.status !== 'pending')) {
+          window.location.reload();
+          return;
+        }
+        setTimeout(tick, 3000);
+      })
+      .catch(function () { setTimeout(tick, 5000); });
+  }
+  setTimeout(tick, 3000);
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -17,6 +17,10 @@
 .vac-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
 .vac-row:hover{background:rgba(201,243,28,.03)}
 .vac-row:last-child{border-bottom:0}
+.lvl{font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.lvl-junior{background:rgba(201,243,28,.12);color:var(--accent)}
+.lvl-middle{background:rgba(103,183,255,.12);color:#67b7ff}
+.lvl-senior{background:rgba(255,184,107,.12);color:#ffb86b}
 </style>
 
 <div class="page-head">
@@ -38,13 +42,15 @@
            style="position:absolute;right:0;top:calc(100%+6px);z-index:50;min-width:230px;
                   background:#14161b;border:1px solid rgba(255,255,255,.1);border-radius:10px;
                   padding:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;" x-cloak>
-        {% if selected_category or selected_source or q %}
+        {% if selected_category or selected_source or selected_level or q %}
         <form method="post" action="{% url 'vacancies:clear' %}"
               onsubmit="return confirm('{{ t.vac_clear_confirm }}')">
           {% csrf_token %}
           <input type="hidden" name="scope" value="filtered">
           <input type="hidden" name="category" value="{{ selected_category }}">
           <input type="hidden" name="source" value="{{ selected_source }}">
+          <input type="hidden" name="level" value="{{ selected_level }}">
+          <input type="hidden" name="q" value="{{ q }}">
           <button type="submit" class="btn btn-ghost" style="width:100%;justify-content:flex-start;font-size:12px;">
             <span class="nav-icon" style="font-size:15px;color:var(--warning)">filter_alt_off</span>
             {{ t.vac_clear_filtered }}
@@ -90,6 +96,15 @@
     </select>
   </div>
   <div class="filter-field filter-norm">
+    <label>{{ t.lbl_level }}</label>
+    <select name="level">
+      <option value="">{{ t.btn_all|slice:":-2" }}</option>
+      {% for value, label in levels %}
+      <option value="{{ value }}" {% if selected_level == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-field filter-norm">
     <label>{{ t.vac_filter_sort }}</label>
     <select name="sort">
       <option value="-created_at">{{ t.vac_sort_newest }}</option>
@@ -100,7 +115,7 @@
   <button class="btn btn-primary" type="submit" style="min-height:36px;">
     <span class="nav-icon" style="font-size:15px">filter_list</span>{{ t.btn_filter }}
   </button>
-  {% if q or selected_category or selected_source %}
+  {% if q or selected_category or selected_source or selected_level %}
   <a class="btn btn-ghost" href="{% url 'vacancies:list' %}" style="min-height:36px;">
     <span class="nav-icon" style="font-size:15px">close</span>{{ t.btn_clear }}
   </a>
@@ -117,9 +132,10 @@
         {% if v.is_remote %}<span class="badge badge-green" style="margin-left:6px;font-size:9px;">{{ t.vac_badge_remote }}</span>{% endif %}
       </div>
       <div style="color:var(--muted-2);font-size:11px;margin-top:3px;">
-        {{ v.company_name }} · {{ v.city|default:t.vac_no_city }} · {{ v.source }}{% if v.salary %} · {{ v.salary }}{% endif %}
+        {{ v.company_name }} · {{ v.city|default:t.vac_no_city }} · {{ v.source }}{% if v.salary %} · {{ v.salary }}{% endif %}{% if v.experience %} · {{ t.lbl_experience }}: {{ v.experience }} {{ t.lbl_years }}{% endif %}
       </div>
     </div>
+    <span class="lvl lvl-{{ v.level }}">{{ v.get_level_display }}</span>
     <span class="badge badge-gray" style="font-size:9px;white-space:nowrap;">{% if v.category %}{{ v.category|cat_name:current_lang }}{% else %}{{ t.vac_no_category }}{% endif %}</span>
     <strong style="font-size:13px;min-width:28px;text-align:right;{% if v.score >= 90 %}color:var(--accent){% elif v.score >= 70 %}color:#67b7ff{% else %}color:var(--muted){% endif %}">{{ v.score }}</strong>
     <a class="btn btn-secondary" href="{% url 'vacancies:detail' v.id %}" style="min-height:30px;padding:5px 12px;font-size:11px;">{{ t.btn_open }}</a>

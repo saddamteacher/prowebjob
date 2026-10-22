@@ -47,8 +47,9 @@
 </div>
 
 <!-- Stats -->
-<div class="grid grid-4">
+<div class="grid grid-5">
   <div class="card stat"><span class="stat-label">{{ t.lbl_score }}</span><strong class="stat-value {% if v.score >= 80 %}accent{% endif %}">{{ v.score }}</strong></div>
+  <div class="card stat"><span class="stat-label">{{ t.lbl_level }}</span><strong style="font-size:18px;font-weight:800;color:{% if v.level == 'junior' %}var(--accent){% elif v.level == 'middle' %}#67b7ff{% else %}#ffb86b{% endif %};">{{ v.get_level_display }}</strong>{% if v.experience %}<span style="font-size:11px;color:var(--muted);">{{ t.lbl_experience }}: {{ v.experience }} {{ t.lbl_years }}</span>{% endif %}</div>
   <div class="card stat"><span class="stat-label">{{ t.lbl_platform }}</span><strong style="font-size:18px;font-weight:700;">{{ v.source }}</strong></div>
   <div class="card stat"><span class="stat-label">{{ t.lbl_city }}</span><strong style="font-size:18px;font-weight:700;">{{ v.city|default:t.vac_detail_city_none }}</strong></div>
   <div class="card stat"><span class="stat-label">{{ t.lbl_direction }}</span><strong style="font-size:15px;font-weight:700;">{% if v.category %}{{ v.category|cat_name:current_lang }}{% else %}{{ t.vac_no_category }}{% endif %}</strong></div>

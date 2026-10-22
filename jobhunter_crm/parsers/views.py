@@ -2,7 +2,6 @@
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 
 from platforms.models import Platform
 from vacancies.models import ParsedLog
@@ -21,12 +20,6 @@ def parser_monitor(request):
 
 @login_required(login_url='core:login')
 def parser_run(request):
-    """Run all parsers manually."""
-    from .engine import run_all_parsers
-    result = run_all_parsers()
-    messages.success(
-        request,
-        f"Parser yakunlandi: {result['total_new']} ta yangi, "
-        f"{result['total_errors']} ta xatolik"
-    )
-    return redirect('parser:monitor')
+    """Old entry point: manual runs now go through the filtered search page,
+    which works in the background instead of blocking the request."""
+    return redirect('search:index')

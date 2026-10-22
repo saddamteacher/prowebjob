@@ -45,6 +45,12 @@ class Skill(models.Model):
 
 class Vacancy(models.Model):
     """Vacancy from any source."""
+    LEVEL_CHOICES = [
+        ('junior', 'Junior'),
+        ('middle', 'Middle'),
+        ('senior', 'Senior'),
+    ]
+
     title = models.CharField(max_length=500)
     company_name = models.CharField(max_length=300, db_index=True)
     salary = models.CharField(max_length=200, blank=True, null=True)
@@ -57,6 +63,8 @@ class Vacancy(models.Model):
         related_name='vacancies'
     )
     score = models.IntegerField(default=0)
+    level = models.CharField(max_length=10, choices=LEVEL_CHOICES, default='junior', db_index=True)
+    experience = models.CharField(max_length=20, blank=True, help_text="Talab qilinadigan tajriba (yil)")
     is_remote = models.BooleanField(default=False)
     is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(null=True, blank=True)

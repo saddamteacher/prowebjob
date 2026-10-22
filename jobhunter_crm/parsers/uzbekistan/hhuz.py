@@ -5,57 +5,63 @@ from urllib.parse import urlsplit, urlunsplit
 from bs4 import BeautifulSoup
 
 from parsers.base import BaseParser, ParserError
+from services.level_detector import LEVELS, LEVEL_HH_EXPERIENCE
 
 BASE_URL = "https://tashkent.hh.uz"
 
 # Har kategoriya uchun bir nechta so'rov — barchasiga teng ko'p natija
-CATEGORY_QUERIES = [
-    # ── DATA ANALYST ──────────────────────────────────────
-    "data analyst", "аналитик данных", "BI аналитик",
-    "бизнес аналитик", "аналитик", "data analyst junior",
-    "системный аналитик", "продуктовый аналитик",
+QUERIES_BY_CATEGORY = {
+    'data_analyst': [
+        "data analyst", "аналитик данных", "BI аналитик",
+        "бизнес аналитик", "аналитик", "data analyst junior",
+        "системный аналитик", "продуктовый аналитик",
+    ],
+    'data_science': [
+        "data scientist", "machine learning", "ml engineer",
+        "data science", "специалист по данным", "ai engineer",
+    ],
+    'python': [
+        "python developer", "python разработчик", "django developer",
+        "backend developer", "бэкенд разработчик", "python программист",
+        "fastapi developer",
+    ],
+    'frontend': [
+        "frontend developer", "react developer", "vue developer",
+        "javascript разработчик", "фронтенд разработчик",
+        "верстальщик", "web developer", "angular developer",
+    ],
+    'graphic_design': [
+        "ui ux designer", "графический дизайнер", "figma designer",
+        "веб дизайнер", "дизайнер", "product designer",
+        "motion designer", "брендинг дизайнер",
+    ],
+    'smm': [
+        "smm менеджер", "таргетолог", "контент менеджер",
+        "smm специалист", "интернет маркетолог", "маркетолог",
+        "digital marketing", "seo специалист", "контекстолог",
+    ],
+    'mobilograf': [
+        "видеограф", "мобилограф", "видеомонтажер",
+        "video editor", "монтажер", "контент мейкер",
+    ],
+    '3d_max': [
+        "3ds max", "интерьерный дизайнер", "визуализатор",
+        "autocad", "архитектор", "3d визуализатор", "дизайнер интерьера",
+    ],
+    'blender': [
+        "blender", "3d artist", "3d моделлер",
+        "3d аниматор", "game designer", "3d дизайнер",
+    ],
+    'ms_office': [
+        "офис менеджер", "оператор пк", "excel специалист",
+        "секретарь", "администратор", "делопроизводитель",
+        "1с оператор", "ассистент", "data entry",
+    ],
+}
 
-    # ── DATA SCIENCE ──────────────────────────────────────
-    "data scientist", "machine learning", "ml engineer",
-    "data science", "специалист по данным", "ai engineer",
+CATEGORY_QUERIES = [q for queries in QUERIES_BY_CATEGORY.values() for q in queries]
 
-    # ── PYTHON / BACKEND ──────────────────────────────────
-    "python developer", "python разработчик", "django developer",
-    "backend developer", "бэкенд разработчик", "python программист",
-    "fastapi developer",
-
-    # ── FRONTEND ──────────────────────────────────────────
-    "frontend developer", "react developer", "vue developer",
-    "javascript разработчик", "фронтенд разработчик",
-    "верстальщик", "web developer", "angular developer",
-
-    # ── GRAPHIC / UI-UX DESIGN ────────────────────────────
-    "ui ux designer", "графический дизайнер", "figma designer",
-    "веб дизайнер", "дизайнер", "product designer",
-    "motion designer", "брендинг дизайнер",
-
-    # ── SMM / MARKETING ───────────────────────────────────
-    "smm менеджер", "таргетолог", "контент менеджер",
-    "smm специалист", "интернет маркетолог", "маркетолог",
-    "digital marketing", "seo специалист", "контекстолог",
-
-    # ── MOBILOGRAF / VIDEO ────────────────────────────────
-    "видеограф", "мобилограф", "видеомонтажер",
-    "video editor", "монтажер", "контент мейкер",
-
-    # ── 3D MAX / AUTOCAD ──────────────────────────────────
-    "3ds max", "интерьерный дизайнер", "визуализатор",
-    "autocad", "архитектор", "3d визуализатор", "дизайнер интерьера",
-
-    # ── BLENDER / 3D ART ──────────────────────────────────
-    "blender", "3d artist", "3d моделлер",
-    "3d аниматор", "game designer", "3d дизайнер",
-
-    # ── MS OFFICE / ADMIN ─────────────────────────────────
-    "офис менеджер", "оператор пк", "excel специалист",
-    "секретарь", "администратор", "делопроизводитель",
-    "1с оператор", "ассистент", "data entry",
-]
+EXPERIENCE_PREFIX = "vacancy-serp__vacancy-work-experience-"
 
 
 class HHUZParser(BaseParser):
@@ -71,12 +77,13 @@ class HHUZParser(BaseParser):
         items = []
         seen: set[str] = set()
 
-        for query in CATEGORY_QUERIES:
+        for query, experience in self._requests():
             for page in range(self.MAX_PAGES):
                 try:
                     response = self.get(
                         f"{BASE_URL}/search/vacancy",
                         params={
+                            **({"experience": experience} if experience else {}),
                             "text":         query,
                             "area":         97,        # Uzbekistan
                             "search_field": "name",    # sarlavhada — aniqlik
@@ -124,6 +131,7 @@ class HHUZParser(BaseParser):
                             "url":         url,
                             "description": description[:2000],
                             "source":      "HH.UZ",
+                            "experience_code": self._experience_code(card),
                         })
 
                     # Agar sahifada yangi vakansiya bo'lmasa — keyingi so'rovga
@@ -134,6 +142,36 @@ class HHUZParser(BaseParser):
                     break  # bu so'rov xato berdi, keyingisiga o't
 
         return items
+
+    def _queries(self) -> list[str]:
+        if not self.categories:
+            return CATEGORY_QUERIES
+        return [q for cat, queries in QUERIES_BY_CATEGORY.items()
+                if cat in self.categories for q in queries]
+
+    def _experience_filter(self) -> list[str]:
+        """HH 'experience' values for the selected levels ([] = no filter).
+
+        HH honours only one experience value per request, so each value is a
+        separate pass; with 3+ values a single unfiltered pass is cheaper and
+        the engine filters by level afterwards.
+        """
+        if not self.levels:
+            return []
+        codes = [code for level in LEVELS if level in self.levels
+                 for code in LEVEL_HH_EXPERIENCE[level]]
+        return codes if len(codes) <= 2 else []
+
+    def _requests(self) -> list[tuple[str, str | None]]:
+        """(query, experience code or None) pairs to fetch."""
+        experiences = self._experience_filter() or [None]
+        return [(query, exp) for exp in experiences for query in self._queries()]
+
+    def _experience_code(self, card) -> str | None:
+        el = card.select_one(f"[data-qa^='{EXPERIENCE_PREFIX}']")
+        if not el:
+            return None
+        return el.get("data-qa", "")[len(EXPERIENCE_PREFIX):] or None
 
     def _canonical_url(self, value: str | None) -> str:
         if not value:

@@ -18,6 +18,7 @@ urlpatterns = [
     path('settings/', include('settings_app.urls')),
     path('logs/', include('logs_app.urls')),
     path('scheduler/', include('scheduler.urls')),
+    path('search/', include('search.urls')),
 ]
 
 if settings.DEBUG:

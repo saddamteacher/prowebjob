@@ -60,6 +60,9 @@
         <a class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:index' %}">
           <span class="nav-icon">dashboard</span>{{ t.nav_dashboard }}
         </a>
+        <a class="nav-link {% if request.resolver_match.app_name == 'search' %}active{% endif %}" href="{% url 'search:index' %}">
+          <span class="nav-icon">travel_explore</span>{{ t.nav_search }}
+        </a>
         <a class="nav-link {% if request.resolver_match.app_name == 'vacancies' %}active{% endif %}" href="{% url 'vacancies:list' %}">
           <span class="nav-icon">work</span>{{ t.nav_vacancies }}
         </a>

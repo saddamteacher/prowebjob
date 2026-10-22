@@ -1,0 +1,4 @@
+# Windows desktop build (desktop/build.ps1)
+-r requirements.txt
+waitress==3.0.2
+pyinstaller==6.22.3

@@ -1,5 +1,7 @@
 """Vacancy views."""
 
+from urllib.parse import urlencode
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -15,6 +17,7 @@ def vacancy_list(request):
     q = request.GET.get('q', '')
     category = request.GET.get('category', '')
     source = request.GET.get('source', '')
+    level = request.GET.get('level', '')
     sort = request.GET.get('sort', '-created_at')
 
     vacancies = Vacancy.objects.select_related('category').all()
@@ -30,6 +33,8 @@ def vacancy_list(request):
         vacancies = vacancies.filter(category__slug=category)
     if source:
         vacancies = vacancies.filter(source__iexact=source)
+    if level:
+        vacancies = vacancies.filter(level=level)
 
     order_fields = {
         '-created_at': '-created_at',
@@ -51,6 +56,8 @@ def vacancy_list(request):
         'q': q,
         'selected_category': category,
         'selected_source': source,
+        'selected_level': level,
+        'levels': Vacancy.LEVEL_CHOICES,
         'sort': sort,
         'section': 'vacancies',
     }
@@ -115,14 +122,25 @@ def vacancy_clear(request):
     qs = Vacancy.objects.all()
     category = request.POST.get('category', '')
     source   = request.POST.get('source', '')
+    level    = request.POST.get('level', '')
+    q        = request.POST.get('q', '')
     scope    = request.POST.get('scope', 'all')
 
-    # Faqat filtrlanganlarni tozalash
+    # Faqat filtrlanganlarni tozalash — ro'yxatdagi filtrlar bilan bir xil
     if scope == 'filtered':
+        if q:
+            qs = qs.filter(
+                Q(title__icontains=q) |
+                Q(company_name__icontains=q) |
+                Q(description__icontains=q) |
+                Q(city__icontains=q)
+            )
         if category:
             qs = qs.filter(category__slug=category)
         if source:
             qs = qs.filter(source__iexact=source)
+        if level:
+            qs = qs.filter(level=level)
 
     count = qs.count()
     qs.delete()
@@ -138,10 +156,9 @@ def vacancy_clear(request):
 
     # Filtrlangan bo'lsa, filtrni saqlab qaytar
     if scope == 'filtered':
-        params = []
-        if category: params.append(f'category={category}')
-        if source:   params.append(f'source={source}')
-        qstr = '?' + '&'.join(params) if params else ''
+        params = {k: v for k, v in
+                  {'q': q, 'category': category, 'source': source, 'level': level}.items() if v}
+        qstr = '?' + urlencode(params) if params else ''
         return redirect(f"{request.path.replace('clear/', '')}{qstr}")
     return redirect('vacancies:list')
 
